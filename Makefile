@@ -1,6 +1,6 @@
 NAME = codexion.a
 CC = cc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -pthread
 TARGET = codexion
 RM = rm -rf
 AR = ar -rc

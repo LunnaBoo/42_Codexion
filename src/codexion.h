@@ -11,11 +11,13 @@ typedef struct s_coder
 {
 	pthread_t	thread;
 	
-}	t_coder
+}	t_coder;
 
 typedef struct s_simulation
 {
 	t_coder	*coders;
-}	t_simulation
+}	t_simulation;
+
+int	ft_isdigit(int c);
 
 #endif

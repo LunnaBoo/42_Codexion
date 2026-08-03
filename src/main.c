@@ -26,6 +26,18 @@ int	main(int argc, char **argv)
 		fprintf(stderr, "Error: invalid arguments.\n");
 		return (1);
 	}
+	if (sim_init(&sim) == 0)
+	{
+		fprintf(stderr, "Error: simulation init failed.\n");
+		return (1);
+	}
+	if (sim_run(&sim) == 0)
+	{
+		fprintf(stderr, "Error: simulation run failed.\n");
+		sim_destroy(&sim);
+		return (1);
+	}
+	sim_destroy(&sim);
 	return (0);
 }
 

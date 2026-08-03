@@ -1,6 +1,10 @@
 # Agent instructions (local only)
 AGENTS.md
 
+# Tests and test artifacts (local only, not committed)
+tests/
+traces/
+
 # Executables
 codexion
 

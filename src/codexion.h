@@ -19,6 +19,7 @@
 # include <unistd.h>
 # include <stdio.h>
 # include <sys/time.h>
+# include <time.h>
 
 typedef struct s_coder		t_coder;
 typedef struct s_simulation	t_simulation;
@@ -33,12 +34,15 @@ typedef struct s_heap_node
 	long	seq;
 }	t_heap_node;
 
+typedef int					(*t_heap_cmp)(t_heap_node *, t_heap_node *);
+
 typedef struct s_heap
 {
 	t_heap_node	*nodes;
 	int			size;
 	int			capacity;
-	int			(*cmp)(t_heap_node *, t_heap_node *);
+	long		seq;
+	t_heap_cmp	cmp;
 }	t_heap;
 
 typedef struct s_dongle
@@ -86,8 +90,29 @@ typedef struct s_simulation
 	t_dongle		*dongles;
 }	t_simulation;
 
-long	get_current_time(void);
-int		ft_usleep(size_t milliseconds);
-int		ft_isdigit(int c);
+struct timespec	ms_to_timespec(size_t milliseconds);
+long			get_current_time(void);
+int				ft_usleep(size_t milliseconds);
+int				ft_isdigit(int c);
+int				sim_init(t_simulation *sim);
+void			sim_destroy(t_simulation *sim);
+int				init_dongles(t_simulation *sim);
+int				init_coders(t_simulation *sim);
+void			destroy_dongles(t_simulation *sim, int count);
+void			destroy_dongle_partial(t_dongle *d);
+int				heap_init(t_heap *h, int capacity, t_heap_cmp cmp);
+void			heap_destroy(t_heap *h);
+int				heap_push(t_heap *h, t_heap_node item);
+int				heap_pop(t_heap *h, t_heap_node *out);
+int				cmp_node(t_heap_node *a, t_heap_node *b);
+void			log_action(t_simulation *sim, int id, char *msg);
+void			log_burnout(t_simulation *sim, int id);
+void			request_dongle(t_dongle *d, t_coder *c, t_simulation *sim);
+void			release_dongle(t_dongle *d, long cooldown);
+void			take_dongles(t_coder *coder);
+void			release_dongles(t_coder *coder);
+void			*coder_routine(void *arg);
+void			*monitor_routine(void *arg);
+int				sim_run(t_simulation *sim);
 
 #endif

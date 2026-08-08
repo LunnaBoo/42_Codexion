@@ -15,6 +15,7 @@
 static int	check_burnout(t_simulation *sim);
 static int	check_completion(t_simulation *sim);
 static void	wake_all(t_simulation *sim);
+static void	terminate_sim(t_simulation *sim, int burn_id);
 
 void	*monitor_routine(void *arg)
 {
@@ -23,20 +24,29 @@ void	*monitor_routine(void *arg)
 
 	sim = (t_simulation *)arg;
 	burn_id = 0;
+	pthread_mutex_lock(&sim->compile_lock);
 	while (1)
 	{
 		burn_id = check_burnout(sim);
 		if (burn_id != 0 || check_completion(sim) == 1)
 			break ;
+		pthread_mutex_unlock(&sim->compile_lock);
 		usleep(1000);
+		pthread_mutex_lock(&sim->compile_lock);
 	}
+	pthread_mutex_unlock(&sim->compile_lock);
+	terminate_sim(sim, burn_id);
+	return (NULL);
+}
+
+static void	terminate_sim(t_simulation *sim, int burn_id)
+{
 	pthread_mutex_lock(&sim->dead_lock);
 	sim->dead_flag = 1;
 	pthread_mutex_unlock(&sim->dead_lock);
 	wake_all(sim);
 	if (burn_id != 0)
 		log_burnout(sim, burn_id);
-	return (NULL);
 }
 
 static int	check_burnout(t_simulation *sim)

@@ -40,6 +40,14 @@ Explaining each argument:
 9. Scheduler refers to the arbitration policy used by dongles to decide who gets them when multiple coders request them. FIFO means First in First Out,
 the most common queue known to people, and EDF means Earliest Deadline First.
 
+# Blocking cases handled
+I documented all of these in the wiki, so I'll paste here the sections relevant to this and maybe add a thing or two. If you're interested in more details on this the wiki will be your friend.
+!!!!!!!!!!!!!!!!!!!!!!! WIP
+
+# Thread Synchronization mechanisms
+This is also documented in the wiki, but I think I can get into further detail here.
+!!!!!!!!!!!!!!!!!!!!!! WIP
+
 # Resources
 Besides being a philosophers guide, it still helped me to sketch my plan for each step of the project's code. Helped me decide the structs I'd use
 and the project's core logic. \
@@ -47,3 +55,10 @@ https://medium.com/@ruinadd/philosophers-42-guide-the-dining-philosophers-proble
 
 Introduction to threads, also pretty useful. I even took some screenshots to use in the Wiki of this repo. \
 https://www.youtube.com/watch?v=LOfGJcVnvAk
+
+Rob Pike, co-creator of Go, talk about concurrency. I've actually stumbled upon this before even
+starting Codexion and thanks to it I had good context on what this project needed from me. \
+https://go.dev/blog/waza-talk
+
+AI was used in this project's development through OpenCode to help with C syntax and write tons of tests to each functionality of this project. Tests weren't committed to this repository but were fundamental to avoid setbacks during development. \
+Useful to give wiki-related feedback, correct any misconceptions throughout both the wiki and source code and to make development faster overall.

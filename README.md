@@ -1,4 +1,4 @@
-This project has been created as part of the 42 curriculum by <luccribe>.
+_This project has been created as part of the 42 curriculum by luccribe_
 
 # Description
 This project is a revamp of the old Philosophers project from 42, and very well known programming problem. Besides having it's own particularities

@@ -41,13 +41,56 @@ Explaining each argument:
 the most common queue known to people, and EDF means Earliest Deadline First.
 
 # Blocking cases handled
-I documented all of these in the wiki, so I'll paste here the sections relevant to this and maybe add a thing or two. If you're interested in more details on this the wiki will be your friend.
-!!!!!!!!!!!!!!!!!!!!!!! WIP
+I documented all of these in the wiki, so if you're interested in more details on this the wiki will be your friend. \
+First obvious case was with the dongles. It is extremely easy to mess up the dongle requisition per coder and fall into a deadlock. \
+Imagine this situation:
+Coder	Dongles	Pedidos em ordem
+```
+Coder	Dongles	Requests, in order
+1	    {0, 1}	0 → 1
+2	    {1, 2}	1 → 2
+3	    {2, 3}	2 → 3
+4	    {3, 0}	3 → 0
+```
+What happens when Coder 4 holds dongle 3 and blocks onto dongle 0? Coder 1 holds dongle 0, but it will only release it once it gets
+dongle 1 which is with Coder 2. Problem is Coder 2 is waiting for Dongle 2 which is with Coder 3 who is also waiting for a dongle, dongle 3, which is with Coder 4. \
+Since Coder 4 will only release the dongle 3 after it gets dongle 0, every coder is now stuck waiting for a dongle that will never
+arrive. Before I get into the solution to this in my implementation, I should talk about Coffman's conditions. \
+These are a set of four conditions that need to happen simultaneously for a deadlock to (possibly) happen, they are:
+1. Mutual exclusion: No two processes can obtain a resource at the same time.
+2. Hold-and-wait: Once a resource is obtained, a process keeps the resource locked.
+3. Circular wait: A cycle where each thread waits on a resource held by the next (dongle example above).
+4. No pre-emption: Resources cannot be forcibly removed from a task.
+
+Based on this, my solution aimed to fix the circular wait ordering dongle requests in ascending dongle-id order. So instead of Coder 4 holding dongle 3 and waiting for dongle 0, it requests
+dongle 0 first and holds nothing while it waits for it to be granted. This breaks the cycle. \
+Updated scenario:
+```
+Coder	Dongles	Requests, in order
+1	    {0, 1}	0 → 1
+2	    {1, 2}	1 → 2
+3	    {2, 3}	2 → 3
+4	    {3, 0}	0 → 3
+```
+Deadlock fixed.
+
+There was also the single coder edge-case which resulted in a coder requesting the same dongle twice, but this was fixed in one line so there isn't much to talk about.
 
 # Thread Synchronization mechanisms
 This is also documented in the wiki, but I think I can get into further detail here.
-!!!!!!!!!!!!!!!!!!!!!! WIP
-
+I'll explain the threading primitives used to sync all threads and make this multi-threaded program work:
+##### pthread_t
+It's the data type used to uniquely identify a thread. In our code it is the thread, in simple terms.
+##### pthread_mutex
+(section translated directly from the repository's wiki)
+The solution to race conditions. It is like a lock that protects a block of code and can only be executed by it's owner until they unlock it themselves.
+With this a thread can lock, modify the variable locked, and only then unlock. If a second thread tries to modify the variable at the same time it will fail because of the mutex lock applied
+by the first one. \
+Also important to note that it is crucial to initialize and then destroy the mutex after it's done it's job. It doesn't work otherwise.
+##### pthread_cond_t
+It's a condition variable, the pthread type for "sleep until signaled" bell. Besides my description of it, a condition variable has no condition inside, it just meant to send a signal. The condition itself is just data protected by a mutex. \
+This has to be paired to a mutex to avoid race conditions (two or more threads changing the shared data) and avoid lost wake-up. The latter happens when a thread checks the condition == false, then the condition is changed (no mutex preventing it) and the thread sleeps anyway since it's checked evaluated to false.
+Because of this, in order to use pthread_cond_t it is essential to lock and unlock the data being used as condition. This primitive is crucial to thread syncing and communication, it'd be impossible to develop this program without it.
 # Resources
 Besides being a philosophers guide, it still helped me to sketch my plan for each step of the project's code. Helped me decide the structs I'd use
 and the project's core logic. \
@@ -60,5 +103,5 @@ Rob Pike, co-creator of Go, talk about concurrency. I've actually stumbled upon 
 starting Codexion and thanks to it I had good context on what this project needed from me. \
 https://go.dev/blog/waza-talk
 
-AI was used in this project's development through OpenCode to help with C syntax and write tons of tests to each functionality of this project. Tests weren't committed to this repository but were fundamental to avoid setbacks during development. \
-Useful to give wiki-related feedback, correct any misconceptions throughout both the wiki and source code and to make development faster overall.
+AI was used in this project's development through OpenCode Go to help with C syntax and write tons of tests to each functionality of this project. Tests weren't committed to this repository but were fundamental to avoid setbacks during development. \
+It was useful to give wiki-related feedback, correct any misconceptions throughout both wiki and source code and to make development faster overall.
